@@ -3,6 +3,7 @@ package br.com.stock.monitoring.driver.http.stock;
 import br.com.stock.monitoring.application.ports.in.StockSubscription;
 import br.com.stock.monitoring.driver.http.stock.dto.StockPriceDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -17,7 +18,7 @@ public class StockController {
         this.stockSubscription = stockSubscription;
     }
 
-    @GetMapping("/{symbol}/prices")
+    @GetMapping(value = "/{symbol}/prices", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseBody
     public Flux<StockPriceDto> subscribe(@PathVariable String symbol) {
         return stockSubscription

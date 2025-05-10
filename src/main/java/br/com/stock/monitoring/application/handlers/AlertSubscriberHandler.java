@@ -26,18 +26,15 @@ public class AlertSubscriberHandler implements AlertSubscriber {
         var stockPrices = stocks.fetchStockPrices();
         var activeAlerts = alerts.getActiveAlerts();
 
-        return Flux.zip(stockPrices, activeAlerts)
-                .filter((p) -> p.getT1().symbol().equals(p.getT2().symbol()))
-                .filter((p) -> {
-                    var stockPrice = p.getT1();
-                    var alert = p.getT2();
-
-                    return switch (alert.condition()) {
-                        case GREATER_THAN -> stockPrice.price() > alert.targetPrice();
-                        case LESS_THAN -> stockPrice.price() < alert.targetPrice();
-                        case EQUAL_TO -> stockPrice.price() == alert.targetPrice();
-                    };
-                })
-                .map((t) -> new AlertNotification(t.getT1().symbol(), t.getT1().price(), t.getT2().condition(), t.getT2().targetPrice()));
+        return stockPrices
+                .flatMap((stockPrice) -> activeAlerts
+                        .filter((a) -> a.symbol().equals(stockPrice.symbol()))
+                        .filter((alert) -> switch (alert.condition()) {
+                            case GREATER_THAN -> stockPrice.price() > alert.targetPrice();
+                            case LESS_THAN -> stockPrice.price() < alert.targetPrice();
+                            case EQUAL_TO -> stockPrice.price() == alert.targetPrice();
+                        })
+                        .map((alert) -> new AlertNotification(alert.symbol(), stockPrice.price(), alert.condition(), alert.targetPrice()))
+                );
     }
 }

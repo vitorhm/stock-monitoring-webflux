@@ -6,6 +6,7 @@ import br.com.stock.monitoring.driver.http.alert.dto.AlertNotificationDto;
 import br.com.stock.monitoring.driver.http.alert.dto.CreatePriceAlertDto;
 import br.com.stock.monitoring.driver.http.alert.dto.PriceAlertDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,7 +42,8 @@ public class AlertController {
                 .cancel(UUID.fromString(id));
     }
 
-    @GetMapping("/notifications")
+    @GetMapping(value = "/notifications", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ResponseBody
     public Flux<AlertNotificationDto> notifications() {
 
         return alertSubscriber
